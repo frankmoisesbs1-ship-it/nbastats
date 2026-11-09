@@ -8,7 +8,6 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-[#09090b] text-gray-100 font-sans">
   <div id="root"></div>
@@ -17,7 +16,6 @@
     function App() {
       const [activeTab, setActiveTab] = React.useState('inicio');
       const [userRole, setUserRole] = React.useState('admin');
-      const [lastSync, setLastSync] = React.useState('02:45 AM');
       const [syncTimer, setSyncTimer] = React.useState(3600);
 
       React.useEffect(() => {
@@ -35,7 +33,6 @@
 
       return (
         <div className="min-h-screen bg-[#09090b] text-gray-100">
-          {/* BARRA SUPERIOR */}
           <header className="bg-[#18181b] border-b border-[#27272a] px-4 py-2 text-xs flex flex-wrap justify-between items-center gap-2">
             <div className="flex items-center space-x-3">
               <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded font-mono font-semibold">NBAStats PRO</span>
@@ -53,71 +50,69 @@
             </div>
           </header>
 
-          {/* NAVEGACIÓN */}
-          <nav className="bg-[#18181b] border-b border-[#27272a] px-4 py-3 flex justify-between items-center">
+          <nav className="bg-[#18181b] border-b border-[#27272a] px-4 py-3 flex justify-between items-center sticky top-0 z-50">
             <div className="flex items-center space-x-2 font-black text-xl text-white">
               <span className="text-amber-500">NBA</span>STATS
             </div>
-            <div className="flex space-x-2 text-sm">
-              <button onClick={() => setActiveTab('inicio')} className={`px-3 py-1.5 rounded ${activeTab === 'inicio' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'text-gray-300'}`}>Inicio</button>
-              <button onClick={() => setActiveTab('analizador')} className={`px-3 py-1.5 rounded ${activeTab === 'analizador' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'text-gray-300'}`}>Analizador</button>
-              <button onClick={() => setActiveTab('cuotas')} className={`px-3 py-1.5 rounded ${activeTab === 'cuotas' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'text-gray-300'}`}>Cuotas TriunfoBet</button>
+            <div className="flex space-x-1 text-sm">
+              <button onClick={() => setActiveTab('inicio')} className={`px-3 py-1.5 rounded ${activeTab === 'inicio' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold' : 'text-gray-300 hover:text-white'}`}>Inicio</button>
+              <button onClick={() => setActiveTab('analizador')} className={`px-3 py-1.5 rounded ${activeTab === 'analizador' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold' : 'text-gray-300 hover:text-white'}`}>Analizador</button>
+              <button onClick={() => setActiveTab('cuotas')} className={`px-3 py-1.5 rounded ${activeTab === 'cuotas' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold' : 'text-gray-300 hover:text-white'}`}>Cuotas TriunfoBet</button>
               {userRole === 'admin' && (
                 <button onClick={() => setActiveTab('admin')} className={`px-3 py-1.5 rounded ${activeTab === 'admin' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold' : 'text-amber-400'}`}>Panel Admin</button>
               )}
             </div>
           </nav>
 
-          {/* CONTENIDO */}
           <main className="max-w-6xl mx-auto p-6 space-y-6">
             {activeTab === 'inicio' && (
               <div className="space-y-4">
                 <h1 className="text-2xl font-bold text-white">Centro NBA & Partidos en Directo</h1>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-[#18181b] border border-[#27272a] p-4 rounded-xl space-y-2">
-                    <span className="text-xs bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded font-bold">EN VIVO (Q4 03:42)</span>
-                    <div className="flex justify-between font-semibold text-white"><span>Boston Celtics</span><span className="font-mono">112</span></div>
-                    <div className="flex justify-between font-semibold text-white"><span>Los Angeles Lakers</span><span className="font-mono">108</span></div>
+                  <div className="bg-[#18181b] border border-[#27272a] p-4 rounded-xl space-y-2 shadow-lg">
+                    <span className="text-xs bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded font-bold border border-rose-500/30">EN VIVO (Q4 03:42)</span>
+                    <div className="flex justify-between font-semibold text-white pt-1"><span>Boston Celtics</span><span className="font-mono text-lg">112</span></div>
+                    <div className="flex justify-between font-semibold text-white"><span>Los Angeles Lakers</span><span className="font-mono text-lg">108</span></div>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'analizador' && (
-              <div className="bg-[#18181b] border border-[#27272a] p-6 rounded-xl space-y-4">
+              <div className="bg-[#18181b] border border-[#27272a] p-6 rounded-xl space-y-4 shadow-lg">
                 <h1 className="text-2xl font-bold text-white">Analizador de Líneas (Prop Bets)</h1>
                 <p className="text-sm text-gray-400">Cálculo exacto de OVER, UNDER y PUSH excluyendo partidos sin participación (DNP).</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Muestra Válida</span><p className="text-xl font-bold font-mono">20 Partidos</p></div>
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Aciertos OVER</span><p className="text-xl font-bold font-mono text-emerald-400">13 (65%)</p></div>
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Aciertos UNDER</span><p className="text-xl font-bold font-mono text-rose-400">7 (35%)</p></div>
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Promedio Reciente</span><p className="text-xl font-bold font-mono text-amber-400">29.2 PTS</p></div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#27272a]">
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Muestra Válida</span><p className="text-xl font-bold font-mono">20 Partidos</p></div>
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Aciertos OVER</span><p className="text-xl font-bold font-mono text-emerald-400">13 (65%)</p></div>
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Aciertos UNDER</span><p className="text-xl font-bold font-mono text-rose-400">7 (35%)</p></div>
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Promedio Reciente</span><p className="text-xl font-bold font-mono text-amber-400">29.2 PTS</p></div>
                 </div>
               </div>
             )}
 
             {activeTab === 'cuotas' && (
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap gap-2">
                   <h1 className="text-2xl font-bold text-white">Cuotas NBA & TriunfoBet</h1>
-                  <span className="bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded">CARGADA MANUALMENTE POR EL ADMINISTRADOR</span>
+                  <span className="bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded uppercase font-mono">CARGADA MANUALMENTE POR EL ADMINISTRADOR</span>
                 </div>
-                <div className="bg-[#18181b] border border-[#27272a] p-4 rounded-xl space-y-2">
+                <div className="bg-[#18181b] border border-[#27272a] p-4 rounded-xl space-y-2 max-w-md shadow-lg">
                   <span className="text-xs text-gray-400">Celtics vs Lakers - Ganador</span>
-                  <p className="text-sm font-bold text-white">Boston Celtics (-4.5) — Cuota: 1.91</p>
+                  <p className="text-base font-bold text-white">Boston Celtics (-4.5) — Cuota: 1.91</p>
                   <span className="text-[10px] text-amber-500 block">Autorizado por Frankm07mm</span>
                 </div>
               </div>
             )}
 
             {activeTab === 'admin' && userRole === 'admin' && (
-              <div className="bg-[#18181b] border border-[#27272a] p-6 rounded-xl space-y-4">
+              <div className="bg-[#18181b] border border-[#27272a] p-6 rounded-xl space-y-4 shadow-lg">
                 <h1 className="text-2xl font-bold text-white">Panel de Administración (Frankm07mm)</h1>
                 <p className="text-sm text-gray-400">Gestión de cuotas y control de acceso de miembros activos.</p>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Clientes Activos</span><p className="text-2xl font-bold font-mono">42</p></div>
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Pagos Pendientes</span><p className="text-2xl font-bold font-mono text-amber-400">3</p></div>
-                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400">Cuotas Publicadas</span><p className="text-2xl font-bold font-mono">12</p></div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Clientes Activos</span><p className="text-2xl font-bold font-mono text-white">42</p></div>
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Pagos Pendientes</span><p className="text-2xl font-bold font-mono text-amber-400">3</p></div>
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]"><span className="text-xs text-gray-400 block mb-1">Cuotas Publicadas</span><p className="text-2xl font-bold font-mono text-white">12</p></div>
                 </div>
               </div>
             )}
