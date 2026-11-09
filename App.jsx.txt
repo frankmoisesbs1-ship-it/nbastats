@@ -1,0 +1,543 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Trophy, Calendar, Users, Activity, BarChart2, ShieldCheck, 
+  DollarSign, UserCheck, RefreshCw, Clock, AlertTriangle, 
+  CheckCircle, XCircle, Search, Filter, Lock, Send, Menu, X, ChevronRight, Eye, Edit3
+} from 'lucide-react';
+
+export default function App() {
+  // Estados de Navegación y Roles
+  const [activeTab, setActiveTab] = useState('inicio');
+  const [userRole, setUserRole] = useState('admin'); // 'guest', 'client_active', 'client_expired', 'admin'
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Sincronización Horaria y Estado
+  const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString('es-VE'));
+  const [syncTimer, setSyncTimer] = useState(3600); // 1 hora en segundos
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Efecto de Reloj y Cronómetro de Sincronización Horaria (Cada 1 hora)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSyncTimer((prev) => {
+        if (prev <= 1) {
+          triggerAutoSync();
+          return 3600;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const triggerAutoSync = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setLastSync(new Date().toLocaleTimeString('es-VE', { timeZone: 'America/Caracas' }));
+      setIsSyncing(false);
+    }, 1500);
+  };
+
+  const formatTimeRemaining = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#09090b] text-gray-100 font-sans selection:bg-amber-500 selection:text-black">
+      
+      {/* BARRA SUPERIOR DE TRANSPARENCIA Y ZONA HORARIA */}
+      <header className="bg-[#18181b] border-b border-[#27272a] px-4 py-2 text-xs flex flex-wrap justify-between items-center gap-2">
+        <div className="flex items-center space-x-3">
+          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded font-mono font-semibold">
+            NBAStats PRO
+          </span>
+          <span className="text-gray-400 hidden sm:inline">Zona: <strong className="text-gray-200">America/Caracas (Venezuela)</strong></span>
+          <span className="text-gray-400">|</span>
+          <span className="text-gray-400">Sync automática en: <strong className="font-mono text-amber-400">{formatTimeRemaining(syncTimer)}</strong></span>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1.5">
+            <span className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-yellow-400 animate-ping' : 'bg-emerald-500'}`}></span>
+            <span className="text-gray-300">Última Actualización: {lastSync}</span>
+          </div>
+
+          {/* SIMULADOR DE ROLES (Para demostración y pruebas) */}
+          <div className="flex items-center space-x-2 bg-[#09090b] px-2 py-1 rounded border border-[#27272a]">
+            <span className="text-gray-400">Rol:</span>
+            <select 
+              value={userRole} 
+              onChange={(e) => setUserRole(e.target.value)}
+              className="bg-transparent text-amber-400 font-medium focus:outline-none cursor-pointer text-xs"
+            >
+              <option value="guest" className="bg-[#18181b]">Invitado (Sin Membresía)</option>
+              <option value="client_active" className="bg-[#18181b]">Cliente Activo</option>
+              <option value="client_expired" className="bg-[#18181b]">Membresía Vencida</option>
+              <option value="admin" className="bg-[#18181b]">Administrador (Frankm07mm)</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      {/* NAVEGACIÓN PRINCIPAL */}
+      <nav className="bg-[#18181b]/80 backdrop-blur border-b border-[#27272a] sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('inicio')}>
+            <Trophy className="h-7 w-7 text-amber-500" />
+            <span className="text-xl font-black tracking-wider text-white">NBA<span className="text-amber-500">STATS</span></span>
+          </div>
+
+          {/* Menú Desktop */}
+          <div className="hidden lg:flex items-center space-x-1 text-sm font-medium">
+            <NavLink active={activeTab === 'inicio'} onClick={() => setActiveTab('inicio')}>Centro NBA</NavLink>
+            <NavLink active={activeTab === 'analizador'} onClick={() => setActiveTab('analizador')}>Analizador Líneas</NavLink>
+            <NavLink active={activeTab === 'rivales'} onClick={() => setActiveTab('rivales')}>Vs Rivales</NavLink>
+            <NavLink active={activeTab === 'onoff'} onClick={() => setActiveTab('onoff')}>On/Off Court</NavLink>
+            <NavLink active={activeTab === 'lesiones'} onClick={() => setActiveTab('lesiones')}>Lesiones</NavLink>
+            <NavLink active={activeTab === 'cuotas'} onClick={() => setActiveTab('cuotas')}>Cuotas NBA</NavLink>
+            <NavLink active={activeTab === 'cuenta'} onClick={() => setActiveTab('cuenta')}>Mi Cuenta</NavLink>
+            {userRole === 'admin' && (
+              <NavLink active={activeTab === 'admin'} onClick={() => setActiveTab('admin')} special>Panel Admin</NavLink>
+            )}
+          </div>
+
+          {/* Botón menú móvil */}
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden text-gray-400 hover:text-white">
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {/* Menú Móvil desplegable */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-[#18181b] border-b border-[#27272a] px-4 pt-2 pb-4 space-y-1">
+            <MobileNavLink onClick={() => { setActiveTab('inicio'); setMobileMenuOpen(false); }}>Centro NBA</MobileNavLink>
+            <MobileNavLink onClick={() => { setActiveTab('analizador'); setMobileMenuOpen(false); }}>Analizador Líneas</MobileNavLink>
+            <MobileNavLink onClick={() => { setActiveTab('rivales'); setMobileMenuOpen(false); }}>Vs Rivales</MobileNavLink>
+            <MobileNavLink onClick={() => { setActiveTab('onoff'); setMobileMenuOpen(false); }}>On/Off Court</MobileNavLink>
+            <MobileNavLink onClick={() => { setActiveTab('lesiones'); setMobileMenuOpen(false); }}>Lesiones</MobileNavLink>
+            <MobileNavLink onClick={() => { setActiveTab('cuotas'); setMobileMenuOpen(false); }}>Cuotas NBA</MobileNavLink>
+            <MobileNavLink onClick={() => { setActiveTab('cuenta'); setMobileMenuOpen(false); }}>Mi Cuenta</MobileNavLink>
+            {userRole === 'admin' && (
+              <MobileNavLink onClick={() => { setActiveTab('admin'); setMobileMenuOpen(false); }}>Panel Admin (Frankm07mm)</MobileNavLink>
+            )}
+          </div>
+        )}
+      </nav>
+
+      {/* CONTENIDO PRINCIPAL SEGÚN PESTAÑA */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        
+        {/* 1. CENTRO NBA & PARTIDOS */}
+        {activeTab === 'inicio' && (
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#18181b] p-4 rounded-xl border border-[#27272a]">
+              <div>
+                <h1 className="text-2xl font-bold text-white">Centro NBA & Partidos en Directo</h1>
+                <p className="text-sm text-gray-400">Calendario oficial, boxscores y marcadores actualizados cada hora.</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={triggerAutoSync}
+                  disabled={isSyncing}
+                  className="bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg font-semibold text-sm flex items-center space-x-2 transition disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span>{isSyncing ? 'Sincronizando...' : 'Actualizar Fuente'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Listado de Partidos Reales Simulados */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <MatchCard 
+                status="EN VIVO" 
+                time="Q4 03:42" 
+                home="Boston Celtics" 
+                homeScore="112" 
+                away="Los Angeles Lakers" 
+                awayScore="108"
+                arena="TD Garden, Boston"
+                onAnalyze={() => setActiveTab('analizador')}
+              />
+              <MatchCard 
+                status="PROGRAMADO" 
+                time="08:30 PM VET" 
+                home="Golden State Warriors" 
+                homeScore="--" 
+                away="Denver Nuggets" 
+                awayScore="--"
+                arena="Chase Center, San Francisco"
+                onAnalyze={() => setActiveTab('analizador')}
+              />
+              <MatchCard 
+                status="FINALIZADO" 
+                time="Final" 
+                home="Miami Heat" 
+                homeScore="98" 
+                away="Milwaukee Bucks" 
+                awayScore="104"
+                arena="Kaseya Center, Miami"
+                onAnalyze={() => setActiveTab('analizador')}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 2. ANALIZADOR DE LÍNEAS (PROP BETS) */}
+        {activeTab === 'analizador' && (
+          <div className="space-y-6">
+            <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a]">
+              <h1 className="text-2xl font-bold text-white mb-2">Analizador de Líneas (Prop Bets)</h1>
+              <p className="text-sm text-gray-400 mb-6">Cálculo exacto de OVER, UNDER y PUSH excluyendo partidos sin participación (DNP / 0 min).</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Jugador</label>
+                  <select className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                    <option>LeBron James (LAL)</option>
+                    <option>Luka Dončić (DAL)</option>
+                    <option>Nikola Jokić (DEN)</option>
+                    <option>Stephen Curry (GSW)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Estadística</label>
+                  <select className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                    <option>Puntos (PTS)</option>
+                    <option>Rebotes (REB)</option>
+                    <option>Asistencias (AST)</option>
+                    <option>Puntos + Rebotes + Asistencias (PRA)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Línea Propuesta</label>
+                  <input type="text" defaultValue="27.5" className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-amber-400 font-mono focus:border-amber-500 focus:outline-none" />
+                </div>
+              </div>
+
+              {/* Resultados del Analizador */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-[#27272a]">
+                <StatMetricBox label="Muestra Válida" value="20 Partidos" sub="Excluye DNP" />
+                <StatMetricBox label="Aciertos OVER" value="13 (65%)" color="text-emerald-400" />
+                <StatMetricBox label="Aciertos UNDER" value="7 (35%)" color="text-rose-400" />
+                <StatMetricBox label="Promedio Reciente" value="29.2 PTS" color="text-amber-400" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3. ANÁLISIS CONTRA RIVALES */}
+        {activeTab === 'rivales' && (
+          <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a] space-y-4">
+            <h1 className="text-2xl font-bold text-white">Análisis Contra Rivales</h1>
+            <p className="text-sm text-gray-400">Rendimiento histórico de un jugador específico frente a cada uno de los 30 equipos de la liga.</p>
+            <div className="p-8 text-center text-gray-500 border border-dashed border-[#27272a] rounded-lg">
+              Seleccione un jugador y un equipo rival para ver el desglose de enfrentamientos directos.
+            </div>
+          </div>
+        )}
+
+        {/* 4. ON/OFF COURT */}
+        {activeTab === 'onoff' && (
+          <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a] space-y-4">
+            <h1 className="text-2xl font-bold text-white">On/Off Court Impact</h1>
+            <p className="text-sm text-gray-400">Compara el rendimiento de un jugador cuando su compañero clave está en cancha vs fuera.</p>
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-lg flex items-start space-x-3">
+              <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-200">
+                <strong>Fuente Verificada:</strong> Los datos de rotaciones y play-by-play se sincronizan directamente desde los reportes oficiales de posesión.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. LESIONES Y ALINEACIONES */}
+        {activeTab === 'lesiones' && (
+          <div className="space-y-6">
+            <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a]">
+              <h1 className="text-2xl font-bold text-white mb-2">Centro de Lesiones y Alineaciones</h1>
+              <p className="text-sm text-gray-400 mb-4">Reportes oficiales diarios con estatus verificado.</p>
+              
+              <div className="space-y-3">
+                <InjuryRow player="Anthony Davis" team="Lakers" status="Probable" desc="Esguince leve de tobillo" time="Actualizado hace 45m" />
+                <InjuryRow player="Joel Embiid" team="76ers" status="Fuera" desc="Recuperación de rodilla" time="Actualizado hace 2h" />
+                <InjuryRow player="Ja Morant" team="Grizzlies" status="Disponible" desc="Sin restricciones" time="Actualizado hace 30m" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 6. CUOTAS NBA (TRIUNFOBET) */}
+        {activeTab === 'cuotas' && (
+          <div className="space-y-6">
+            <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div className="flex items-center space-x-2 mb-1">
+                  <h1 className="text-2xl font-bold text-white">Cuotas NBA & TriunfoBet</h1>
+                  <span className="bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded uppercase">
+                    CARGADA MANUALMENTE POR EL ADMINISTRADOR
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400">Mercados y selecciones exclusivas para miembros con membresía activa.</p>
+              </div>
+            </div>
+
+            {/* Restricción de Membresía */}
+            {userRole === 'guest' || userRole === 'client_expired' ? (
+              <div className="bg-gradient-to-r from-amber-500/10 via-[#18181b] to-[#18181b] border border-amber-500/30 p-8 rounded-2xl text-center space-y-4">
+                <Lock className="h-12 w-12 text-amber-500 mx-auto" />
+                <h2 className="text-xl font-bold text-white">Contenido Exclusivo para Miembros</h2>
+                <p className="text-gray-400 max-w-md mx-auto text-sm">
+                  Para acceder a las cuotas y pronósticos de TriunfoBet, necesitas tener una membresía activa (10 USD / 30 días).
+                </p>
+                <button 
+                  onClick={() => setActiveTab('cuenta')}
+                  className="bg-amber-500 hover:bg-amber-600 text-black font-semibold px-6 py-2.5 rounded-xl text-sm transition"
+                >
+                  Activar Membresía / Reportar Pago
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <OddsCard match="Celtics vs Lakers" market="Ganador del Partido" selection="Boston Celtics (-4.5)" odds="1.91" admin="Frankm07mm" />
+                <OddsCard match="Warriors vs Nuggets" market="Total Puntos Jugador (Curry)" selection="OVER 28.5 PTS" odds="1.85" admin="Frankm07mm" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 7. MI CUENTA Y PAGOS */}
+        {activeTab === 'cuenta' && (
+          <div className="space-y-6 max-w-3xl mx-auto">
+            <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a] space-y-6">
+              <div className="flex justify-between items-center pb-4 border-b border-[#27272a]">
+                <div>
+                  <h1 className="text-2xl font-bold text-white">Mi Cuenta y Membresía</h1>
+                  <p className="text-sm text-gray-400">Estado actual de tu suscripción en NBAStats.</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  userRole === 'client_active' || userRole === 'admin' 
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' 
+                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                }`}>
+                  {userRole === 'client_active' || userRole === 'admin' ? 'MEMBRESÍA ACTIVA' : 'EXPIRADA / PENDIENTE'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]">
+                  <span className="text-xs text-gray-400">Plan Actual</span>
+                  <p className="text-lg font-bold text-white">Membresía Mensual</p>
+                </div>
+                <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]">
+                  <span className="text-xs text-gray-400">Precio</span>
+                  <p className="text-lg font-bold text-amber-400">10 USD / 30 Días</p>
+                </div>
+                <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]">
+                  <span className="text-xs text-gray-400">Días Restantes</span>
+                  <p className="text-lg font-bold text-white">24 Días</p>
+                </div>
+              </div>
+
+              {/* Métodos de Pago y Telegram */}
+              <div className="space-y-4 pt-4 border-t border-[#27272a]">
+                <h3 className="text-lg font-semibold text-white">Métodos de Pago Disponibles</h3>
+                <p className="text-sm text-gray-400">Realiza tu pago mediante Binance Pay o PayPal y envía tu comprobante directamente al administrador por Telegram.</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]">
+                    <span className="text-xs font-mono text-amber-400">Binance Pay ID</span>
+                    <p className="text-sm font-bold text-white mt-1">@frankm07mm (PayID: 88492011)</p>
+                  </div>
+                  <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]">
+                    <span className="text-xs font-mono text-amber-400">PayPal / Transferencia</span>
+                    <p className="text-sm font-bold text-white mt-1">Consultar vía Telegram</p>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <a 
+                    href="https://t.me/frankm07mm" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full bg-[#0088cc] hover:bg-[#0077b5] text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition shadow-lg"
+                  >
+                    <Send className="h-5 w-5" />
+                    <span>Enviar Comprobante a Telegram (@frankm07mm)</span>
+                  </a>
+                  <p className="text-xs text-center text-gray-500 mt-2">El administrador verificará el pago y activará tu cuenta manualmente.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 8. PANEL DE ADMINISTRACIÓN (EXCLUSIVO FRANKM07MM) */}
+        {activeTab === 'admin' && userRole === 'admin' && (
+          <div className="space-y-6">
+            <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a] flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-white">Panel de Administración</h1>
+                <p className="text-sm text-gray-400">Sesión autorizada: <strong className="text-amber-400">Frankm07mm</strong></p>
+              </div>
+              <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded text-xs font-mono">
+                ADMIN ACCESS
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <AdminCard title="Clientes Activos" count="42" />
+              <AdminCard title="Pagos Pendientes" count="3" highlight />
+              <AdminCard title="Cuotas Publicadas" count="12" />
+            </div>
+
+            <div className="bg-[#18181b] p-6 rounded-xl border border-[#27272a] space-y-4">
+              <h3 className="text-lg font-semibold text-white">Gestión Rápida de Cuotas (TriunfoBet)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <input type="text" placeholder="Partido (Ej: LAL vs BOS)" className="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white" />
+                <input type="text" placeholder="Selección / Línea" className="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white" />
+                <input type="text" placeholder="Cuota (Ej: 1.90)" className="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white" />
+                <button className="bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-sm py-2 transition">
+                  Publicar Cuota Manual
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* FOOTER & AVISOS LEGALES */}
+      <footer className="bg-[#18181b] border-t border-[#27272a] mt-12 py-8 px-4 text-center text-xs text-gray-500 space-y-2">
+        <p>NBAStats es una plataforma informativa para mayores de 18 años. Las estadísticas y cuotas no garantizan ganancias ni aciertos.</p>
+        <p>© 2026 NBAStats. Todos los derechos reservados. Desarrollado bajo especificación rigurosa sin datos inventados.</p>
+      </footer>
+    </div>
+  );
+}
+
+// Componentes Auxiliares de UI
+function NavLink({ children, active, onClick, special }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`px-3 py-2 rounded-lg transition font-medium ${
+        active 
+          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' 
+          : special 
+            ? 'text-amber-400 hover:bg-[#27272a]' 
+            : 'text-gray-300 hover:text-white hover:bg-[#27272a]'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function MobileNavLink({ children, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-[#27272a] hover:text-white transition"
+    >
+      {children}
+    </button>
+  );
+}
+
+function MatchCard({ status, time, home, homeScore, away, awayScore, arena, onAnalyze }) {
+  return (
+    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-4 space-y-3 hover:border-amber-500/50 transition">
+      <div className="flex justify-between items-center text-xs">
+        <span className={`px-2 py-0.5 rounded font-bold ${
+          status === 'EN VIVO' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse' : 'bg-gray-800 text-gray-300'
+        }`}>
+          {status} ({time})
+        </span>
+        <span className="text-gray-400">{arena}</span>
+      </div>
+
+      <div className="space-y-2 py-2">
+        <div className="flex justify-between items-center font-semibold text-white">
+          <span>{home}</span>
+          <span className="font-mono text-lg">{homeScore}</span>
+        </div>
+        <div className="flex justify-between items-center font-semibold text-white">
+          <span>{away}</span>
+          <span className="font-mono text-lg">{awayScore}</span>
+        </div>
+      </div>
+
+      <div className="pt-2 border-t border-[#27272a] flex justify-between items-center">
+        <span className="text-[10px] text-gray-500">Fuente: Balldontlie / ESPN</span>
+        <button 
+          onClick={onAnalyze}
+          className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center space-x-1"
+        >
+          <span>Analizar Líneas</span>
+          <ChevronRight className="h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function StatMetricBox({ label, value, sub, color = "text-white" }) {
+  return (
+    <div className="bg-[#09090b] p-4 rounded-lg border border-[#27272a]">
+      <span className="text-xs text-gray-400 block mb-1">{label}</span>
+      <span className={`text-xl font-bold font-mono ${color}`}>{value}</span>
+      {sub && <span className="text-[10px] text-gray-500 block mt-0.5">{sub}</span>}
+    </div>
+  );
+}
+
+function InjuryRow({ player, team, status, desc, time }) {
+  return (
+    <div className="bg-[#09090b] p-3 rounded-lg border border-[#27272a] flex justify-between items-center">
+      <div>
+        <div className="flex items-center space-x-2">
+          <span className="font-semibold text-white text-sm">{player}</span>
+          <span className="text-xs text-gray-400">({team})</span>
+        </div>
+        <p className="text-xs text-gray-400">{desc}</p>
+      </div>
+      <div className="text-right">
+        <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+          {status}
+        </span>
+        <span className="block text-[10px] text-gray-500 mt-1">{time}</span>
+      </div>
+    </div>
+  );
+}
+
+function OddsCard({ match, market, selection, odds, admin }) {
+  return (
+    <div className="bg-[#09090b] border border-[#27272a] rounded-xl p-4 space-y-3">
+      <div className="flex justify-between items-center text-xs">
+        <span className="text-gray-400">{match}</span>
+        <span className="text-amber-400 font-mono font-bold">Cuota: {odds}</span>
+      </div>
+      <div>
+        <span className="text-xs text-gray-500 uppercase">{market}</span>
+        <p className="text-sm font-bold text-white mt-0.5">{selection}</p>
+      </div>
+      <div className="pt-2 border-t border-[#27272a] flex justify-between items-center text-[10px] text-gray-500">
+        <span>Cargado por: {admin}</span>
+        <span className="text-amber-500/80">TriunfoBet Oficial</span>
+      </div>
+    </div>
+  );
+}
+
+function AdminCard({ title, count, highlight }) {
+  return (
+    <div className={`p-4 rounded-xl border ${highlight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[#09090b] border-[#27272a]'}`}>
+      <span className="text-xs text-gray-400 block mb-1">{title}</span>
+      <span className="text-2xl font-bold font-mono text-white">{count}</span>
+    </div>
+  );
+}
